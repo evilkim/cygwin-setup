@@ -44,6 +44,7 @@ inetutils inetutils-1.9.1-2.tar.bz2 1
 inetutils-server inetutils-server-1.9.1-2.tar.bz2 0
 info info-6.5-2.tar.bz2 0
 ipc-utils ipc-utils-1.0-2.tar.bz2 0
+jq jq-1.5-3.tar.xz 0
 less less-487-1.tar.bz2 0
 libEGL1 libEGL1-17.2.6-1.tar.bz2 0
 libEMF1 libEMF1-1.0.8-1.tar.bz2 0
