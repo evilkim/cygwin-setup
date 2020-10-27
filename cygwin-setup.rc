@@ -1,0 +1,23 @@
+# Extra Cygwin packages to be installed by cygwin-setup with setup-x86_64.exe
+#
+# The Cygwin pip package is out of date, no use installing it here.
+# Use cygwin-setup-python to install additional python packages, including
+# at minimum pip, setuptools, and wheel.
+
+bind-utils	      # e.g. dig, host, nslookup
+curl		      # for when bundled Windows curl comes up lame
+dos2unix	      # including unix2dos
+emacs-w32	      # don't leave home without it
+gcc-core	      # required by pip wheel for (at least) typed-ast
+git		      # too cumbersome using Git Bash /c/Program Files/Git/cmd
+graphviz	      # a picture is worth 1,000 wiki search results
+inetutils	      # e.g. telnet
+libcurl4	      # implied by curl, but versions became mismatched
+make		      # as it says
+openldap	      # for when the FOSS ADExplorer comes up lame
+perl		      # Git Bash considers this essential
+perl-Text-CSV	      # disregarded in favor of Python csv module
+python2		      # emulate ancient RHEL6 environs
+python3		      # see cygwin-setup-python for add-on modules
+python3-devel	      # required by pip wheel for (at least) typed-ast
+tree		      # sometimes ls and find just don't cut it

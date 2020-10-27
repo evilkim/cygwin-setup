@@ -1,0 +1,12 @@
+# Extra Python packages to be installed by cygwin-setup-python with pip
+# Tag packages to be installed only for python2 with #py2
+# Tag packages to be installed only for python3 with #py3
+
+autopep8
+flake8
+ldap3
+mccabe
+pycodestyle # pep8 has been renamed to pycodestyle (GitHub issue #466)
+pyflakes
+pylint
+requests

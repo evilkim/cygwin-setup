@@ -1,0 +1,119 @@
+#!/bin/bash
+set -euo pipefail
+ident="${0##*/}"
+usage="Usage: ${ident}"
+#-----------------------------------------------------------------------------#
+# DESCRIPTION
+#
+# N.B. RUN THIS COMMAND FROM Git Bash for Windows TERMINAL
+#
+# Configure the Cygwin environment to match that of Git [Bash] for Windows,
+# allowing both to share the same "dot files" (~/.bashrc, ~/.gitconfig, etc).
+# * Download and install Cygwin, including any optional packages listed in
+#   cygwin-setup.rc if present.
+# * Override /etc/nsswitch.conf, so that HOME matches Windows USERPROFILE.
+# * Override /etc/fstab, so that e.g:
+#   * /cygdrive/c becomes simply /c, and
+#   * Windows TEMP directory is mounted at /tmp.
+#
+# This is safe to run repeatedly, but it's not truly idempotent and
+# package versions are not locked.  It will not delete any packages
+# removed from cygwin-setup.rc but will upgrade pacakges when a newer
+# version is available.
+#
+# CONFIGURE
+date=$(date --iso-8601=minutes)
+home="${HOMEDRIVE}/${HOMEPATH}"
+pkgdir="${home}/Downloads/Cygwin"
+srcdir=$(dirname ${0})
+pkgrc="${srcdir}/${ident}.rc"
+rootdir="${SYSTEMDRIVE}/Cygwin"
+installed_db="${rootdir}/etc/setup/installed.db"
+setup_exe="${pkgdir}/setup-x86_64.exe"
+setup_log="${pkgdir}/${ident}-${date}.log"
+setup_url="https://cygwin.com/setup-x86_64.exe"
+site="http://mirrors.kernel.org/sourceware/cygwin"
+#/CONFIGURE
+
+case ${#} in
+    0) ;;
+    *) echo >&2 "${ident}: error: Too many args: ${*}"
+       echo >&2 "${usage}"
+       exit 2;;
+esac
+
+case "${OS}/${OSTYPE}" in
+    Windows_NT/msys) ;;
+    Windows_NT/cygwin)
+	echo >&2 "${ident}: error:"\
+		 "Please exit any and all Cygwin processes then"\
+		 "re-run this command from a Git Bash for Windows terminal"
+	exit 1;;
+    *)
+	echo >&2 "${ident}: error: ${OS}/${OSTYPE} is unsupported."
+	exit 1;;
+esac
+
+[[ -x "${setup_exe}" ]] || {
+    echo >&2 "${0##*/}: Please download ${setup_url} and save as ${setup_exe}"
+    exit 1
+}
+
+if [[ -s "${pkgrc}" ]]; then
+    # remove comments and blank lines
+    packages=($(perl -lne 's/\s*#.*//; print if /\S/' "${pkgrc}"))
+else
+    echo >&2 "${ident}: info: ${pkgrc}: No optional packages"
+fi
+packages="${packages[*]}"     # turn array into space separated string
+
+(
+    set -o xtrace
+    # backup currently installed package db (if any)
+    cp -p "${installed_db}"{,.bak} || : Ignore initial setup
+    mkdir -p "${pkgdir}"
+    cd "${pkgdir}"
+    "${setup_exe}"\
+	--local-package-dir "${pkgdir}"\
+	--no-admin\
+	--no-desktop\
+	--only-site\
+	--root "${rootdir}"\
+	--site "${site}"\
+	${packages:+--package-manager --packages "${packages// /,}"}
+    # save initial package db (once)
+    test -f "${installed_db}.orig" || cp -p "${installed_db}"{,.orig}
+    if diff -q "${installed_db}"{.bak,}; then
+	: No changes
+    else
+	# save dated copy of updated package db
+	mv "${installed_db}"{.bak,.${date}} ||
+	    cp -p "${installed_db}"{,.${date}} # Initial setup
+    fi
+) 2>&1 |
+    tee -a "${setup_log}"
+
+fstab="${rootdir}/etc/fstab"
+if [[ -f "${fstab}.orig" ]]; then
+    (set -o xtrace; : ${fstab} already configured)
+else
+    (
+	set -o xtrace
+	mv "${fstab}" "${fstab}.orig"
+	echo "none / cygdrive binary,posix=0,user 0 0" > "${fstab}"
+	echo "none /tmp usertemp binary,posix=0,user 0 0" >> "${fstab}"
+    )
+fi 2>&1 |
+    tee -a "${setup_log}"
+
+nsswitch="${rootdir}/etc/nsswitch.conf"
+if [[ -f "${nsswitch}.orig" ]]; then
+    (set -o xtrace; : ${nsswitch} already configured)
+else
+    (
+	set -o xtrace
+	mv "${nsswitch}" "${nsswitch}.orig"
+	echo "db_home: windows" > "${nsswitch}"
+    )
+fi 2>&1 |
+    tee -a "${setup_log}"

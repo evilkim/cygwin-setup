@@ -1,0 +1,13 @@
+#!/bin/bash
+set -euo pipefail
+#-----------------------------------------------------------------------------#
+# DESCRIPTION
+# Report differences between baseline files under /etc/defaults and those
+# deployed to /etc/skel and, when present, ${HOME}.
+
+for f in $(find /etc/defaults -type f); do
+    g="${f#/etc/defaults}"
+    (set -x; diff -q "$f" "$g" || true)
+    h="${HOME}${g#/etc/skel}"
+    test "$h" = "$g" || test -f "$h" && (set -x; diff -q "$f" "$h" || true)
+done

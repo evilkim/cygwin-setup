@@ -1,0 +1,86 @@
+#!/bin/bash
+set -euo pipefail
+ident="${0##*/}"
+usage="Usage: ${ident} [{--py2|--py3}]"
+#-----------------------------------------------------------------------------#
+# DESCRIPTION
+#
+# N.B. RUN THIS COMMAND FROM Cygwin TERMINAL
+#
+# Install python packages that are unavailable or outdated from Cygwin
+# (or otherwise disfavored).
+#
+# This is safe to run repeatedly, but it's not idempotent and makes no
+# attempt to avoid changing timestamps.
+#
+# OPTIONS
+#
+# --py2		/usr/bin/python invokes python2. Default: python3.
+#
+# --py3		/usr/bin/python invokes python3. This is the default.
+#
+# CONFIGURE
+date=$(date --iso-8601=minutes)
+getpip_url="https://bootstrap.pypa.io/get-pip.py"
+pkgdir="${HOME}/Downloads/Cygwin"
+log="${pkgdir}/${ident}-${date}.log"
+py=3			    # Version invoked by python (and thus pip)
+srcdir=$(dirname ${0})
+pkgrc="${srcdir}/${ident}.rc"
+#/CONFIGURE
+
+case "${OS}/${OSTYPE}" in
+    Windows_NT/cygwin) ;;
+    *) echo >&2 "${ident}: error:"\
+		"Please re-run this command from a Cygwin terminal"
+       exit 1;;
+esac
+
+getpip_py="${pkgdir}/${getpip_url##*/}"
+[[ -f "${getpip_py}" ]] || {
+    # curl -o "${getpip_py}" -k "${getpip_url}"
+    # ^ blocked (maybe just need to setup a proxy?)
+    echo >&2 "${0##*/}: Please download ${getpip_url} and save as ${getpip_py}"
+    exit 1
+}
+
+case ${#} in
+    0) ;;
+    1) case "${1}" in
+	   --py2) py=2;;
+	   --py3) py=3;;
+	   *) echo >&2 "${ident}: error: ${1}: invalid option"
+	      echo >&2 "${usage}"
+	      exit 2;;
+       esac;;
+    *) shift 1; echo >&2 "${ident}: error: ${*}: too many args"
+       echo >&2 "${usage}"
+       exit 2;;
+esac
+
+if [[ -s "${pkgrc}" ]]; then
+    packages=($(env "py=${py}" perl -lne '
+# skip packages tagged for alternate version of Python
+if (/#py\d/) { next unless /#py$ENV{py}/; }
+# remove comments and blank lines
+s/\s*#.*//; print if /\S/'\
+		    "${pkgrc}"))
+else
+    echo >&2 "${ident}: info: ${pkgrc}: No optional packages"
+fi
+
+(
+    set -o xtrace
+
+    # Install pip and supporting cast
+    python${py} "${getpip_py}"
+
+    # Upgrade as needed and install optional packages
+    pip${py} install --upgrade pip setuptools wheel "${packages[@]}"
+
+    # Emulate /usr/sbin/alternatives (TODO: grok info alternatives)
+    rm -f /usr/bin/python /etc/alternatives/python
+    ln -s /usr/bin/python${py} /etc/alternatives/python
+    ln -s /etc/alternatives/python /usr/bin/python
+) 2>&1|
+    tee -a  "${log}"
