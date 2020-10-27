@@ -1,2 +1,2 @@
 # cygwin-setup
-Track Cygwin package requirements for development environment on Windows
+Cygwin development environment configuration using Git Bash to bootstrap.
