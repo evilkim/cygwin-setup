@@ -21,6 +21,7 @@ openldap	      # for when the FOSS ADExplorer comes up lame
 openssh		      # implied by git, made explicit to keep updated
 perl		      # Git Bash considers this essential
 perl-Text-CSV	      # disregarded in favor of Python csv module
+ping		      # Windows ping just isn't the same
 python2		      # emulate ancient RHEL6 environs
 python3		      # see cygwin-setup-python for add-on modules
 python3-devel	      # required by pip wheel for (at least) typed-ast
