@@ -2,6 +2,9 @@
 # Tag packages to be installed only for python2 with #py2
 # Tag packages to be installed only for python3 with #py3
 
+# https://github.com/willthames/ansible-inventory-grapher
+ansible-inventory-grapher
+ansible-lint
 autopep8
 flake8
 ldap3
