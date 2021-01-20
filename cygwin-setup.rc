@@ -17,6 +17,7 @@ libcurl4	      # implied by curl, made explicit to keep updated
 libffi-devel	      # required by pip install ansible
 libssl-devel	      # required by pip install ansible
 make		      # as it says
+# nc                  # Symantec AV classifies nc as a risk :-(
 openldap	      # for when the FOSS ADExplorer comes up lame
 openssh		      # implied by git, made explicit to keep updated
 perl		      # Git Bash considers this essential
