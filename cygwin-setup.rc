@@ -13,6 +13,7 @@ git		      # too cumbersome using Git Bash /c/Program Files/Git/cmd
 graphviz	      # a picture is worth 1,000 wiki search results
 inetutils	      # e.g. telnet
 jq		      # too cumbersome using Windows jq and filepaths
+krb5-workstation      # kinit et alia for e.g. AWX/Tower CLI authentication
 libcurl4	      # implied by curl, made explicit to keep updated
 libffi-devel	      # required by pip install ansible
 libssl-devel	      # required by pip install ansible
