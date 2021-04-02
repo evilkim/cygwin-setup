@@ -9,7 +9,9 @@ autopep8
 flake8
 ldap3
 mccabe
+pexpect
 pycodestyle # pep8 has been renamed to pycodestyle (GitHub issue #466)
 pyflakes
 pylint
 requests
+# requests_negotiate	# Requires MIT krb5-config? Cygwin is Heimdal based :-(
